@@ -7,12 +7,13 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 import java.util.Optional;
 
-@Repository
 public interface EvaluationCategoryRepository extends JpaRepository<EvaluationCategoryEntity, Long> {
     
     Optional<EvaluationCategoryEntity> findByName(String name);
     
-    List<EvaluationCategoryEntity> findAllByOrderByCreatedAtDesc();
+    List<EvaluationCategoryEntity> findAllByOrderByNameAsc();
+
+    List<EvaluationCategoryEntity> findAllByIdxIn(List<Long> idxs);
     
     boolean existsByName(String name);
 }

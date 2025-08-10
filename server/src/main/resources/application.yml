@@ -1,0 +1,46 @@
+spring:
+  jpa:
+    hibernate:
+      ddl-auto: none
+      naming:
+        physical-strategy: org.hibernate.boot.model.naming.CamelCaseToUnderscoresNamingStrategy
+    open-in-view: false
+    properties:
+      format_sql: true
+      show_sql: true
+      use_sql_comments: true
+      dialect: org.hibernate.dialect.MySQL8Dialect
+
+  datasource:
+    driver-class-name: com.mysql.jdbc.Driver
+    url: jdbc:mysql://${DB_URI:localhost:3306/clSpring}?&serverTimezone=${TIME_ZONE:UTC}
+    username: ${DB_USERNAME:clSpring}
+    password: ${DB_PASSWORD:clSpring}
+    hikari:
+      maximum-pool-size: ${DB_MAX_POOL_SIZE:21}
+      connection-test-query: SELECT 1
+      connection-timeout: 3000
+      validation-timeout: 3000
+      idle-timeout: 600000
+      max-lifetime: 18000
+      schema: clSpring
+      health-check-properties:
+        maximumTimeout: 3000
+        validationQuery: SELECT 1
+        validationQueryTimeout: 3000
+      auto-commit: false
+
+  liquibase:
+    change-log: classpath:/db/changelog/changelog-master.yaml
+    enabled: true
+
+file:
+  storage:
+    dir: /app/data
+
+logging:
+  level:
+    org.hibernate: error
+    org.liquibase: error
+  file:
+    path: ./logs
