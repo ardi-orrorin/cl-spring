@@ -1,5 +1,6 @@
 package com.ardi.server.repository.evaluation;
 
+import com.ardi.server.dto.evaluation.response.ResponseEvaluationItem;
 import com.ardi.server.entity.evaluation.EvaluationItemEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -14,4 +15,6 @@ public interface EvaluationItemRepository extends JpaRepository<EvaluationItemEn
     List<EvaluationItemEntity> findAllByNameLikeAndEvaluationCategoryIdx(String name, long evaluationCategoryIdx);
 
     List<EvaluationItemEntity> findAllByIdxIn(List<Long> evaluationItemIdxs);
+
+    List<EvaluationItemEntity> findAllByIsUsed(boolean isUsed);
 }

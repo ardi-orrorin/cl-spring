@@ -9,11 +9,5 @@ import java.util.Optional;
 
 public interface EvaluationCategoryRepository extends JpaRepository<EvaluationCategoryEntity, Long> {
     
-    Optional<EvaluationCategoryEntity> findByName(String name);
-    
-    List<EvaluationCategoryEntity> findAllByOrderByNameAsc();
-
-    List<EvaluationCategoryEntity> findAllByIdxIn(List<Long> idxs);
-    
     boolean existsByName(String name);
 }

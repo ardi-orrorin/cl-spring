@@ -14,6 +14,7 @@ import java.time.Instant;
 @Setter
 @RequiredArgsConstructor
 public class EvaluationProjectEntity {
+
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
     private long idx;

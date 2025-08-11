@@ -9,12 +9,5 @@ import java.util.Optional;
 
 @Repository
 public interface EvaluationProjectRepository extends JpaRepository<EvaluationProjectEntity, Long> {
-    
-    Optional<EvaluationProjectEntity> findByName(String name);
-    
-    List<EvaluationProjectEntity> findAllByOrderByCreatedAtDesc();
-    
-    List<EvaluationProjectEntity> findByParticipationPeriodContaining(String period);
-    
-    boolean existsByName(String name);
+
 }

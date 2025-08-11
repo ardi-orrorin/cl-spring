@@ -6,14 +6,11 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
-import java.util.Arrays;
 import java.util.List;
 
 @Configuration
@@ -22,22 +19,13 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        http
-            // CSRF 보호 비활성화 (REST API용)
-            .csrf(AbstractHttpConfigurer::disable)
-            
-            // CORS 설정 적용
+        http.csrf(AbstractHttpConfigurer::disable)
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-            
-            // 세션 관리 정책: STATELESS (JWT 등을 사용할 경우)
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-            
-            // 요청 인증 설정
-            .authorizeHttpRequests(authz -> authz
+            .authorizeHttpRequests(auth -> auth
                 .anyRequest().permitAll()
             )
-            
-            // HTTP Basic 인증 활성화 (기본값)
+            .formLogin(AbstractHttpConfigurer::disable)
             .httpBasic(httpBasic -> {});
 
         return http.build();
@@ -56,6 +44,4 @@ public class SecurityConfig {
         source.registerCorsConfiguration("/api/**", configuration);
         return source;
     }
-
-
 }

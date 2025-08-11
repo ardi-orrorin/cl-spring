@@ -43,4 +43,12 @@ public class EvaluationItemEntity {
             isUsed
         );
     }
+
+    public ResponseEvaluationItem.Select toSelect() {
+        return new ResponseEvaluationItem.Select(
+            idx,
+            name,
+            score
+        );
+    }
 }

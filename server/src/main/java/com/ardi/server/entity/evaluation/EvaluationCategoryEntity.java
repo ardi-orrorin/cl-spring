@@ -28,8 +28,8 @@ public class EvaluationCategoryEntity {
 
     public ResponseEvaluationCategory.List toResList() {
         return new ResponseEvaluationCategory.List(
-            this.idx,
-            this.name
+            idx,
+            name
         );
     }
 }

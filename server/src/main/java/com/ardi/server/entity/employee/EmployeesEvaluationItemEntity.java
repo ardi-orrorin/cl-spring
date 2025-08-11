@@ -16,7 +16,7 @@ public class EmployeesEvaluationItemEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long idx;
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY)
     private EmployeesEvaluationEntity employeesEvaluation;
 
     @OneToOne

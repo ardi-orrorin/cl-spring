@@ -1,6 +1,7 @@
 package com.ardi.server.entity.employee;
 
 import com.ardi.server.dto.employee.request.RequestEmployeeProject;
+import com.ardi.server.dto.employee.response.ResponseEmployeeEvaluation;
 import com.ardi.server.entity.evaluation.EvaluationProjectEntity;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -27,8 +28,8 @@ public class EmployeesEvaluationEntity{
     @JoinColumn(name = "employee_idx")
     private EmployeeEntity employee;
 
-    @OneToOne
-    private EmployeesEvaluationItemEntity employeesEvaluationItem;
+    @OneToMany(mappedBy = "employeesEvaluation", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private List<EmployeesEvaluationItemEntity> employeesEvaluationItems;
 
     @OneToMany(mappedBy = "employeesEvaluation", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<EvaluationProjectEntity> evaluationProjects;
@@ -44,5 +45,24 @@ public class EmployeesEvaluationEntity{
             .findFirst()
             .ifPresent(req::update);
     }
+
+    public ResponseEmployeeEvaluation.List toList() {
+        List<Long> evaluationItemsIdxs = employeesEvaluationItems
+            .stream()
+            .map(employeesEvaluationItemEntity ->
+                employeesEvaluationItemEntity.getEvaluationItem().getIdx())
+            .toList();
+
+        return new ResponseEmployeeEvaluation.List(
+            idx,
+            employee.getName(),
+            employee.getHireYear(),
+            employee.getEmployeeNumber(),
+            evaluationItemsIdxs,
+            increaseRate,
+            totalScore
+        );
+    }
+
 
 }

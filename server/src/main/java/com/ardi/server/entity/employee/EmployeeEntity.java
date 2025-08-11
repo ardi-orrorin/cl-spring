@@ -26,7 +26,7 @@ public class EmployeeEntity {
     private String hireYear;
 
     @Enumerated(EnumType.STRING)
-    JobTitle jobTitle;
+    private JobTitle jobTitle;
     private long currentAnnualSalary;
 
     @Enumerated(EnumType.STRING)
@@ -56,14 +56,5 @@ public class EmployeeEntity {
             this.employmentStatus.getDisplayName(),
             this.workLocation.getDisplayName()
         );
-    }
-
-    public void addEvaluation(EmployeesEvaluationEntity employeesEvaluationEntity) {
-        if (employeesEvaluations == null) {
-            throw new IllegalArgumentException("Employees Evaluation is null");
-        }
-
-        employeesEvaluations.add(employeesEvaluationEntity);
-        employeesEvaluationEntity.setEmployee(this);
     }
 }
