@@ -17,7 +17,7 @@ import java.time.Instant;
 @RequiredArgsConstructor
 public class EvaluationItemEntity {
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long idx;
     private String name;
 

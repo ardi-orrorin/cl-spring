@@ -16,11 +16,11 @@ import java.util.List;
 @Setter
 public class EmployeesEvaluationEntity{
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long idx;
     
     private int totalScore;
-    private Long increaseRate;
+    private int increaseRate;
     private long nextAnnualSalary;
     private Instant createdAt;
 

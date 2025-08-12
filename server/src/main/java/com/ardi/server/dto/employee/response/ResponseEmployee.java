@@ -6,6 +6,7 @@ public class ResponseEmployee {
         long idx,
         String name,
         String employeeNumber,
+        String hireYear,
         String jobTitle,
         long currentAnnualSalary,
         String employmentStatus,

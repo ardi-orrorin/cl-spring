@@ -34,6 +34,10 @@ public enum WorkLocation {
     }
 
     public static WorkLocation fromDisplayName(String displayName) {
+        if (displayName == null || displayName.trim().isEmpty()) {
+            return null;
+        }
+
         return Arrays.stream(WorkLocation.values())
                 .filter(location -> location.getDisplayName().equals(displayName))
                 .findFirst()

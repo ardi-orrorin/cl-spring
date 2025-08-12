@@ -17,7 +17,7 @@ import java.util.List;
 public class EvaluationCategoryEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long idx;
 
     private String name;

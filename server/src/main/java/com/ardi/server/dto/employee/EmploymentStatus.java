@@ -24,6 +24,10 @@ public enum EmploymentStatus {
     }
 
     public static EmploymentStatus fromDisplayName(String displayName) {
+        if (displayName == null || displayName.trim().isEmpty()) {
+            return null;
+        }
+        
         return Arrays.stream(EmploymentStatus.values())
                 .filter(status -> status.getDisplayName().equals(displayName))
                 .findFirst()

@@ -16,7 +16,7 @@ import java.time.Instant;
 public class EvaluationProjectEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long idx;
     private String name;
     private String participationPeriod;

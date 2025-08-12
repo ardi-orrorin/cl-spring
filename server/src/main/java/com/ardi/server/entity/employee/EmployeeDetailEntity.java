@@ -13,7 +13,7 @@ import lombok.Setter;
 @RequiredArgsConstructor
 public class EmployeeDetailEntity {
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long idx;
 
     private String email;

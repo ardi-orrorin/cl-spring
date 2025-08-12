@@ -7,7 +7,7 @@ public class ResponseEmployeeEvaluation {
         String hireYear,
         String employeeNumber,
         java.util.List<Long> evaluationItemIdxs,
-        Long increaseRate,
+        int increaseRate,
         int totalScore
 
         //fixme: 프로젝트 메모 처리 어떻게 할까

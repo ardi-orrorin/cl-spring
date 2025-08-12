@@ -75,6 +75,7 @@ public class RequestEmployee {
             evaluationEntity.setEmployee(employee);
             evaluationEntity.setCreatedAt(Instant.now());
             evaluationEntity.setTotalScore(0);
+//            evaluationEntity.setIncreaseRate(0L);
             return evaluationEntity;
         }
     }

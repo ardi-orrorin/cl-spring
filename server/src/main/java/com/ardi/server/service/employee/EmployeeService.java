@@ -3,9 +3,9 @@ package com.ardi.server.service.employee;
 import com.ardi.server.dto.common.ResponseStatus;
 import com.ardi.server.dto.employee.EmploymentStatus;
 import com.ardi.server.dto.employee.JobTitle;
+import com.ardi.server.dto.employee.WorkLocation;
 import com.ardi.server.dto.employee.request.RequestEmployee;
 import com.ardi.server.dto.employee.response.ResponseEmployee;
-import com.ardi.server.dto.employee.WorkLocation;
 import com.ardi.server.entity.employee.EmployeeDetailEntity;
 import com.ardi.server.entity.employee.EmployeeEntity;
 import com.ardi.server.entity.employee.EmployeesEvaluationEntity;
@@ -17,7 +17,6 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 
@@ -35,7 +34,7 @@ public class EmployeeService {
     // 사원 목록 검색
     public ResponseStatus<List<ResponseEmployee.Summary>> findAllByNameAndEmploymentStatusAndWorkLocation(RequestEmployee.Search req) {
         List<ResponseEmployee.Summary> data =
-                employeeRepository.findAllByNameAndEmploymentStatusAndWorkLocation(
+                employeeRepository.findByDynamicFilters(
                    req.name(),
                     EmploymentStatus.fromDisplayName(req.employmentStatus()),
                     WorkLocation.fromDisplayName(req.workLocation())
@@ -65,7 +64,8 @@ public class EmployeeService {
         // 사번 자동 생성
         if(entity.getEmployeeNumber().isBlank()) {
             String currentLastEmployeeNumber =
-                employeeRepository.findLastEmployeeNumber(entity.getHireYear());
+                employeeRepository.findLastEmployeeNumber(entity.getHireYear())
+                    .orElse(entity.getHireYear() + "000");
 
             int number = Integer.parseInt(currentLastEmployeeNumber.substring(4)) + 1;
             String nextEmployeeNumber = entity.getHireYear()

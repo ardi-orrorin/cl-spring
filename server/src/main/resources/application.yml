@@ -40,7 +40,7 @@ file:
 
 logging:
   level:
-    org.hibernate: error
-    org.liquibase: error
+    org.hibernate: debug
+    org.liquibase: debug
   file:
     path: ./logs

@@ -19,7 +19,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class EmployeeEntity {
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long idx;
     private String name;
     private String employeeNumber;
@@ -51,6 +51,7 @@ public class EmployeeEntity {
             this.idx,
             this.name,
             this.employeeNumber,
+            this.hireYear,
             this.jobTitle.getDisplayName(),
             this.currentAnnualSalary,
             this.employmentStatus.getDisplayName(),
