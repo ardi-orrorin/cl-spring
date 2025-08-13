@@ -10,4 +10,5 @@ import java.util.Optional;
 @Repository
 public interface EvaluationProjectRepository extends JpaRepository<EvaluationProjectEntity, Long> {
 
+    Optional<EvaluationProjectEntity> findByEmployeesEvaluationIdx(long employeesEvaluationIdx);
 }

@@ -1,4 +1,4 @@
-type SummaryT = {
+type BasicT = {
   idx: number;
   name: string;
   employeeNumber: string;
@@ -7,6 +7,12 @@ type SummaryT = {
   currentAnnualSalary: number;
   employmentStatus: string;
   workLocation: string;
+};
+
+type SummaryT = BasicT;
+
+type DetailT = BasicT & {
+  deptName: string;
 };
 
 type SearchT = {
@@ -26,6 +32,7 @@ type EmployeeDetailT = {
 };
 
 type CreateT = {
+  idx?: number;
   name: string;
   employeeNumber: string;
   hireYear: string;
@@ -45,4 +52,10 @@ export namespace EmployeeServiceType {
   export type Status = StatusT;
   export type EmployeeDetail = EmployeeDetailT;
   export type Create = CreateT;
+  export type Detail = DetailT;
+  export enum EmploymentStatus {
+    RETIRED = '퇴사',
+    WORKING = '근무',
+    ON_LEAVE = '휴직',
+  }
 }

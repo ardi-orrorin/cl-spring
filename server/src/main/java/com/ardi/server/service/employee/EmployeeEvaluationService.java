@@ -23,6 +23,15 @@ public class EmployeeEvaluationService {
     private final EmployeesEvaluationRepository employeesEvaluationRepository;
     private final EmployeesEvaluationItemRepository employeesEvaluationItemRepository;
 
+    public ResponseStatus<List<ResponseEmployeeEvaluation.Report>> findAlUserReport() {
+        List<EmployeesEvaluationEntity> entities = employeesEvaluationRepository.findAll();
+        List<ResponseEmployeeEvaluation.Report> data = entities.stream()
+            .map(EmployeesEvaluationEntity::toReport)
+            .toList();
+
+        return ResponseStatus.success("Employee evaluation list", data);
+    }
+
     public ResponseStatus<List<ResponseEmployeeEvaluation.List>> findAll() {
         List<ResponseEmployeeEvaluation.List> data = employeesEvaluationRepository.findAll()
             .stream()
@@ -34,8 +43,6 @@ public class EmployeeEvaluationService {
 
     @Transactional
     public ResponseStatus<Boolean> update(RequestEmployeeEvaluation.Update req) {
-
-        // Start 사원 평가 추가
         EmployeesEvaluationEntity employeesEvaluationEntity = employeesEvaluationRepository.findById(req.idx())
             .orElseThrow(() -> new IllegalArgumentException("Employee evaluation not found"));
 
@@ -53,38 +60,70 @@ public class EmployeeEvaluationService {
             employeesEvaluationEntity.setTotalScore(totalScore);
         }
 
-        if(!req.projects().isEmpty()) {
-            req.projects().forEach(project -> {
-                if(project.idx() > 0 ) {
-                    employeesEvaluationEntity.addEvaluationProject(project.toEntity());
-                } else {
-                    employeesEvaluationEntity.updateEvaluationProject(project);
-                }
-            });
-        }
+
+        long nextAnnualSalary = calculateNextAnnualSalary(
+            req.increaseRate(),
+            employeesEvaluationEntity.getEmployee().getCurrentAnnualSalary()
+        );
+
+        employeesEvaluationEntity.setNextAnnualSalary(nextAnnualSalary);
 
         employeesEvaluationRepository.save(employeesEvaluationEntity);
-        // End 사원 평가 추가
 
 
-        if(evaluationItemEntities.isEmpty()) {
-            return ResponseStatus.successBoolean("Employee evaluation saved successfully");
-        }
-
-        // Start 평가 항목들 추가
-        List<EmployeesEvaluationItemEntity> employeesEvaluationItemEntities = evaluationItemEntities.stream()
-            .map(evaluationItemEntity -> {
-                EmployeesEvaluationItemEntity employeesEvaluationItemEntity = new EmployeesEvaluationItemEntity();
-                employeesEvaluationItemEntity.setEvaluationItem(evaluationItemEntity);
-                employeesEvaluationItemEntity.setEmployeesEvaluation(employeesEvaluationEntity);
-                return employeesEvaluationItemEntity;
-            }).toList();
-
-        employeesEvaluationItemRepository.saveAll(employeesEvaluationItemEntities);
-        // End 평가 항목들 추가
+        saveEmployeeEvaluationItemSave(evaluationItemEntities, employeesEvaluationEntity);
 
         return ResponseStatus.successBoolean("Employee evaluation saved successfully");
     }
 
+    private long calculateNextAnnualSalary(int increaseRate, long currentAnnualSalary) {
+        return currentAnnualSalary + (currentAnnualSalary * increaseRate / 100);
+    }
 
+    private void saveEmployeeEvaluationItemSave(
+        List<EvaluationItemEntity> evaluationItemEntities,
+        EmployeesEvaluationEntity employeesEvaluationEntity
+    ) {
+        // 기존 평가 항목들 조회
+        List<EmployeesEvaluationItemEntity> existingItems = 
+            employeesEvaluationItemRepository.findByEmployeesEvaluationIdx(employeesEvaluationEntity.getIdx());
+        
+        // 기존 평가 항목 ID 목록
+        List<Long> existingItemIds = existingItems.stream()
+            .map(item -> item.getEvaluationItem().getIdx())
+            .toList();
+        
+        // 새로 들어온 평가 항목 ID 목록
+        List<Long> newItemIds = evaluationItemEntities.stream()
+            .map(EvaluationItemEntity::getIdx)
+            .toList();
+        
+        // 삭제할 항목들 (기존에 있지만 새로운 목록에 없는 것들)
+        List<EmployeesEvaluationItemEntity> itemsToDelete = existingItems.stream()
+            .filter(item -> !newItemIds.contains(item.getEvaluationItem().getIdx()))
+            .toList();
+        
+        // 추가할 항목들 (새로운 목록에 있지만 기존에 없는 것들)
+        List<EvaluationItemEntity> itemsToAdd = evaluationItemEntities.stream()
+            .filter(item -> !existingItemIds.contains(item.getIdx()))
+            .toList();
+        
+        // 삭제 실행
+        if (!itemsToDelete.isEmpty()) {
+            employeesEvaluationItemRepository.deleteAll(itemsToDelete);
+        }
+        
+        // 추가 실행
+        if (!itemsToAdd.isEmpty()) {
+            List<EmployeesEvaluationItemEntity> newEmployeesEvaluationItemEntities = itemsToAdd.stream()
+                .map(evaluationItemEntity -> {
+                    EmployeesEvaluationItemEntity employeesEvaluationItemEntity = new EmployeesEvaluationItemEntity();
+                    employeesEvaluationItemEntity.setEvaluationItem(evaluationItemEntity);
+                    employeesEvaluationItemEntity.setEmployeesEvaluation(employeesEvaluationEntity);
+                    return employeesEvaluationItemEntity;
+                }).toList();
+            
+            employeesEvaluationItemRepository.saveAll(newEmployeesEvaluationItemEntities);
+        }
+    }
 }

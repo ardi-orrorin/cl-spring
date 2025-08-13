@@ -58,4 +58,21 @@ public class EmployeeEntity {
             this.workLocation.getDisplayName()
         );
     }
+
+    public ResponseEmployee.Detail toDetail() {
+        return new ResponseEmployee.Detail(
+            this.idx,
+            this.name,
+            this.employeeNumber,
+            this.hireYear,
+            this.jobTitle.getDisplayName(),
+            this.currentAnnualSalary,
+            this.employmentStatus.getDisplayName(),
+            this.workLocation.getDisplayName(),
+            this.deptName,
+            this.employeeDetail.getEmail(),
+            this.employeeDetail.getPhoneNumber(),
+            this.employeeDetail.getRemark()
+        );
+    }
 }

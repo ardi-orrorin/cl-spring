@@ -1,5 +1,6 @@
 package com.ardi.server.entity.evaluation;
 
+import com.ardi.server.dto.evaluation.response.ResponseEvaluationProject;
 import com.ardi.server.entity.employee.EmployeesEvaluationEntity;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -23,7 +24,17 @@ public class EvaluationProjectEntity {
     private String remark;
     private Instant createdAt;
 
-    @ManyToOne
+    @OneToOne
     @JoinColumn(name = "employees_evaluation_idx")
     private EmployeesEvaluationEntity employeesEvaluation;
+
+    public ResponseEvaluationProject.Project toProject() {
+        return new ResponseEvaluationProject.Project(
+            idx,
+            employeesEvaluation == null ? 0 : employeesEvaluation.getIdx(),
+            name,
+            participationPeriod,
+            remark
+        );
+    }
 }

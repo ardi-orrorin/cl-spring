@@ -74,7 +74,7 @@ CREATE TABLE IF NOT EXISTS employees_evaluation_items
 -- changeset system:v0.0.0-create-table-evaluation_projects
 CREATE TABLE IF NOT EXISTS evaluation_projects (
     idx                         BIGINT PRIMARY KEY AUTO_INCREMENT COMMENT '평가프로젝트메모 ID (PK)',
-    employees_evaluation_idx BIGINT NOT NULL COMMENT '사원평가 ID (FK)',
+    employees_evaluation_idx    BIGINT NOT NULL COMMENT '사원평가 ID (FK)',
     name                        VARCHAR(255) NOT NULL COMMENT '평가프로젝트메모명',
     participation_period        VARCHAR(255) NOT NULL COMMENT '참여기간',
     remark                      VARCHAR(1000) NOT NULL COMMENT '메모',
@@ -97,6 +97,10 @@ ALTER  TABLE employees_evaluation_items
 ALTER TABLE employees_evaluation_items
     ADD CONSTRAINT fk_employees_evaluation_items_evaluation_item_idx
         FOREIGN KEY ( evaluation_item_idx ) REFERENCES evaluation_items ( idx );
+
+ALTER TABLE evaluation_projects
+    ADD CONSTRAINT fk_evaluation_projects_employees_evaluation_idx
+        FOREIGN KEY ( employees_evaluation_idx ) REFERENCES employees_evaluations ( idx );
 
 -- changeset system:v0.0.0-add-unique-constraints
 ALTER TABLE employees

@@ -6,7 +6,6 @@ public class RequestEmployeeEvaluation {
     public record Update(
         long idx,
         List<Long> evaluationItemIdxs,
-        int increaseRate,
-        List<RequestEmployeeProject.Create> projects
-    ) { }
+        int increaseRate
+    ) {}
 }

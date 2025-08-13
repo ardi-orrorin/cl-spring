@@ -25,6 +25,14 @@ public class EmployeeEvaluationController {
         return ResponseEntity.ok(result);
     }
 
+    @GetMapping("/report")
+    public ResponseEntity<ResponseStatus<List<ResponseEmployeeEvaluation.Report>>> findAllReport() {
+        ResponseStatus<List<ResponseEmployeeEvaluation.Report>> result =
+            employeeEvaluationService.findAlUserReport();
+
+        return ResponseEntity.ok(result);
+    }
+
     @PutMapping("")
     public ResponseEntity<ResponseStatus<Boolean>> update(
         @Valid @RequestBody RequestEmployeeEvaluation.Update req

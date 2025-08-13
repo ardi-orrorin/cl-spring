@@ -1,6 +1,5 @@
 package com.ardi.server.entity.employee;
 
-import com.ardi.server.dto.employee.request.RequestEmployeeProject;
 import com.ardi.server.dto.employee.response.ResponseEmployeeEvaluation;
 import com.ardi.server.entity.evaluation.EvaluationProjectEntity;
 import jakarta.persistence.*;
@@ -31,20 +30,8 @@ public class EmployeesEvaluationEntity{
     @OneToMany(mappedBy = "employeesEvaluation", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<EmployeesEvaluationItemEntity> employeesEvaluationItems;
 
-    @OneToMany(mappedBy = "employeesEvaluation", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-    private List<EvaluationProjectEntity> evaluationProjects;
-
-    public void addEvaluationProject(EvaluationProjectEntity evaluationProject) {
-        evaluationProjects.add(evaluationProject);
-        evaluationProject.setEmployeesEvaluation(this);
-    }
-
-    public void updateEvaluationProject(RequestEmployeeProject.Create req) {
-        evaluationProjects.stream()
-            .filter(project -> project.getIdx() == req.idx())
-            .findFirst()
-            .ifPresent(req::update);
-    }
+    @OneToOne(mappedBy = "employeesEvaluation", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private EvaluationProjectEntity evaluationProject;
 
     public ResponseEmployeeEvaluation.List toList() {
         List<Long> evaluationItemsIdxs = employeesEvaluationItems
@@ -58,11 +45,22 @@ public class EmployeesEvaluationEntity{
             employee.getName(),
             employee.getHireYear(),
             employee.getEmployeeNumber(),
+            employee.getCurrentAnnualSalary(),
             evaluationItemsIdxs,
             increaseRate,
             totalScore
         );
     }
 
-
+    public ResponseEmployeeEvaluation.Report toReport() {
+        return new ResponseEmployeeEvaluation.Report(
+            idx,
+            employee.getName(),
+            employee.getEmploymentStatus().getDisplayName(),
+            employee.getCurrentAnnualSalary(),
+            nextAnnualSalary,
+            increaseRate,
+            totalScore
+        );
+    }
 }

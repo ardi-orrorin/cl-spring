@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue';
-import EmployeeServiceApi from '../(serivce)/api';
+import EmployeeServiceApi from '../serivces/api';
 
 const props = defineProps<{
   show: boolean;

@@ -12,22 +12,27 @@ public class RequestEvaluationItem {
     ){}
 
     public record Create(
-            String name,
-            int score,
-            boolean isUsed,
-            String remark,
-            long evaluationCategoryIdx
+        long idx,
+        String name,
+        int score,
+        boolean isUsed,
+        String remark,
+        long evaluationCategoryIdx
     ) {
         public EvaluationItemEntity toEntity() {
             EvaluationItemEntity entity = new EvaluationItemEntity();
+            update(entity);
+            entity.setCreatedAt(Instant.now());
+
+            return entity;
+        }
+
+        public void update(EvaluationItemEntity entity) {
             entity.setName(name);
             entity.setScore(score);
             entity.setUsed(isUsed);
             entity.setRemark(remark);
-            entity.setCreatedAt(Instant.now());
             entity.setUpdatedAt(Instant.now());
-
-            return entity;
         }
     }
 }

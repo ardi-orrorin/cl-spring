@@ -1,17 +1,64 @@
 <script setup lang="ts">
-import { onBeforeMount, ref } from 'vue';
-import { useRouter } from 'vue-router';
-import EmployeeServiceApi from '../(feature)/(serivce)/api';
-import type { EmployeeServiceType } from '../(feature)/(serivce)/type';
+import { computed, onBeforeMount, ref } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
+import EmployeeServiceApi from '../(feature)/serivces/api';
+import type { EmployeeServiceType } from '../(feature)/serivces/type';
 
 const router = useRouter();
+const route = useRoute();
 const loading = ref(false);
 const status = ref<EmployeeServiceType.Status>({});
 
+// Check if it's edit mode based on query parameters
+const isEditMode = computed(() => {
+  return route.query.edit === 'true' && route.query.idx;
+});
+
+const employeeIdx = computed(() => {
+  return route.query.idx ? Number(route.query.idx) : null;
+});
+
+// Format salary with commas for display
+const formattedSalary = computed(() => {
+  if (!body.value.currentAnnualSalary) return '';
+  return body.value.currentAnnualSalary.toLocaleString();
+});
+
 onBeforeMount(async () => {
   const { data } = await EmployeeServiceApi.findAllStatus();
-
   status.value = data.data;
+
+  if (isEditMode.value && employeeIdx.value) {
+    try {
+      const [employee, detail] = await Promise.allSettled([
+        EmployeeServiceApi.findByIdx(employeeIdx.value),
+        EmployeeServiceApi.findByEmployeeIdx(employeeIdx.value),
+      ]);
+
+      if (employee.status === 'fulfilled' && detail.status === 'fulfilled') {
+        const employeeData = employee.value.data.data;
+        const detailData = detail.value.data.data;
+
+        body.value = {
+          idx: employeeData.idx,
+          name: employeeData.name,
+          employeeNumber: employeeData.employeeNumber,
+          hireYear: employeeData.hireYear,
+          currentAnnualSalary: employeeData.currentAnnualSalary,
+          jobTitle: employeeData.jobTitle,
+          employmentStatus: employeeData.employmentStatus,
+          workLocation: employeeData.workLocation,
+          deptName: employeeData.deptName,
+          email: detailData.email,
+          phoneNumber: detailData.phoneNumber,
+          remark: detailData.remark,
+        };
+      }
+    } catch (error) {
+      console.error('Failed to load employee data:', error);
+      alert('직원 정보를 불러오는데 실패했습니다.');
+    }
+  }
 });
 
 const body = ref<EmployeeServiceType.Create>({
@@ -35,7 +82,14 @@ const handleSubmit = async () => {
 
   loading.value = true;
   try {
-    await EmployeeServiceApi.save(body.value);
+    if (isEditMode.value) {
+      await EmployeeServiceApi.update(body.value);
+    } else {
+      await EmployeeServiceApi.save(body.value);
+    }
+
+    alert(`${isEditMode.value ? '수정' : '생성'} 완료되었습니다.`);
+
     router.push('/employee/list');
   } catch (error) {
     console.error('Submit error:', error);
@@ -81,13 +135,26 @@ const validateForm = (): boolean => {
     return false;
   }
 
+  const phoneRegex = /^\d{3}-\d{3,4}-\d{4}$/;
+  if (!phoneRegex.test(body.value.phoneNumber)) {
+    alert('올바른 전화번호 형식을 입력해주세요. 예: 010-0000-0000');
+    return false;
+  }
+
   return true;
+};
+
+const handleSalaryInput = (event: Event) => {
+  const target = event.target as HTMLInputElement;
+  const value = target.value;
+  const numericValue = value.replace(/[^\d]/g, '');
+  body.value.currentAnnualSalary = numericValue ? Number(numericValue) : 0;
 };
 </script>
 
 <template>
   <div class="container-fluid py-4">
-    <h2 class="mb-4">사원 등록</h2>
+    <h2 class="mb-4">{{ isEditMode ? '사원 수정' : '사원 등록' }}</h2>
 
     <form @submit.prevent="handleSubmit">
       <div class="row g-3">
@@ -132,7 +199,8 @@ const validateForm = (): boolean => {
           <label for="salary" class="form-label">급여</label>
           <input
             id="salary"
-            v-model="body.currentAnnualSalary"
+            :value="formattedSalary"
+            @input="handleSalaryInput"
             type="text"
             class="form-control"
             placeholder="연봉 (원)"
@@ -212,7 +280,7 @@ const validateForm = (): boolean => {
         <button type="button" class="btn btn-secondary" @click="router.push('/employee/list')">목록</button>
         <button type="button" class="btn btn-primary" @click="handleSubmit" :disabled="loading">
           <span v-if="loading" class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
-          저장
+          {{ isEditMode ? '수정' : '저장' }}
         </button>
       </div>
     </form>

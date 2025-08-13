@@ -26,7 +26,7 @@ public class EvaluationItemService {
         RequestEvaluationItem.Search req
     ) {
         List<ResponseEvaluationItem.Summary> data =
-            evaluationItemRepository.findAllByNameLikeAndEvaluationCategoryIdx(req.name(), req.evaluationCategoryIdx())
+            evaluationItemRepository.findByDynamicFilters(req.name(), req.evaluationCategoryIdx())
                 .stream()
                 .map(EvaluationItemEntity::toSummary)
                 .toList();
@@ -34,6 +34,7 @@ public class EvaluationItemService {
         return ResponseStatus.success("Success", data);
     }
 
+    @Transactional
     public ResponseStatus<Boolean> save(RequestEvaluationItem.Create req) {
         EvaluationItemEntity entity = req.toEntity();
         EvaluationCategoryEntity evaluationCategoryEntity =
@@ -46,6 +47,23 @@ public class EvaluationItemService {
         return ResponseStatus.successBoolean("Created successfully");
     }
 
+    @Transactional
+    public ResponseStatus<Boolean> update(RequestEvaluationItem.Create req) {
+        EvaluationItemEntity entity = evaluationItemRepository.findById(req.idx())
+            .orElseThrow(() -> new IllegalArgumentException("Evaluation Item not found"));
+
+        EvaluationCategoryEntity evaluationCategoryEntity =
+            evaluationCategoryRepository.findById(req.evaluationCategoryIdx())
+               .orElseThrow(() -> new IllegalArgumentException("Evaluation Category not found"));
+
+        entity.setEvaluationCategory(evaluationCategoryEntity);
+
+        req.update(entity);
+        evaluationItemRepository.save(entity);
+
+        return ResponseStatus.successBoolean("Updated successfully");
+    }
+
     public ResponseStatus<List<ResponseEvaluationItem.Select>> findAllByUsed() {
         List<ResponseEvaluationItem.Select> data =
             evaluationItemRepository.findAllByIsUsed(true)
@@ -54,5 +72,12 @@ public class EvaluationItemService {
                 .toList();
 
         return ResponseStatus.success("Success", data);
+    }
+
+    public ResponseStatus<ResponseEvaluationItem.Detail> findByIdx(long idx) {
+        EvaluationItemEntity entity = evaluationItemRepository.findById(idx)
+            .orElseThrow(() -> new IllegalArgumentException("Evaluation Item not found"));
+
+        return ResponseStatus.success("Success", entity.toDetail());
     }
 }

@@ -33,6 +33,16 @@ public class EmployeeController {
         return ResponseEntity.ok(result);
     }
 
+    @GetMapping("/{idx}")
+    public ResponseEntity<ResponseStatus<ResponseEmployee.Detail>> findByIdx(
+        @PathVariable long idx
+    ) {
+        ResponseStatus<ResponseEmployee.Detail> result =
+            employeeService.findByIdx(idx);
+
+        return ResponseEntity.ok(result);
+    }
+
     @GetMapping("status")
     public ResponseEntity<ResponseStatus<Map<String, List<String>>>> findAllStatus() {
         ResponseStatus<Map<String, List<String>>> result =
@@ -57,6 +67,16 @@ public class EmployeeController {
     ) {
         ResponseStatus<Boolean> result
             = employeeService.save(req);
+
+        return ResponseEntity.ok(result);
+    }
+
+    @PutMapping("")
+    public ResponseEntity<ResponseStatus<Boolean>> update(
+        @Valid @RequestBody RequestEmployee.Create req
+    ) {
+        ResponseStatus<Boolean> result
+            = employeeService.update(req);
 
         return ResponseEntity.ok(result);
     }

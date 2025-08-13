@@ -28,6 +28,16 @@ public class EvaluationItemController {
         return ResponseEntity.ok(result);
     }
 
+    @GetMapping("/{idx}")
+    public ResponseEntity<ResponseStatus<ResponseEvaluationItem.Detail>> findByIdx(
+        @PathVariable long idx
+        ) {
+        ResponseStatus<ResponseEvaluationItem.Detail> result =
+            evaluationItemService.findByIdx(idx);
+
+        return ResponseEntity.ok(result);
+    }
+
     @GetMapping("select")
     public ResponseEntity<ResponseStatus<List<ResponseEvaluationItem.Select>>> findAllByUsed() {
         ResponseStatus<List<ResponseEvaluationItem.Select>> result =
@@ -42,6 +52,16 @@ public class EvaluationItemController {
     ) {
         ResponseStatus<Boolean> result =
             evaluationItemService.save(req);
+
+        return ResponseEntity.ok(result);
+    }
+
+    @PutMapping("")
+    public ResponseEntity<ResponseStatus<Boolean>> update(
+        @Valid @RequestBody RequestEvaluationItem.Create req
+    ) {
+        ResponseStatus<Boolean> result =
+            evaluationItemService.update(req);
 
         return ResponseEntity.ok(result);
     }

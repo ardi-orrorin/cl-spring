@@ -19,6 +19,8 @@ public class RequestEmployee {
     ){}
 
     public record Create (
+        long idx,
+
         @NotBlank(message = "Name is required")
         String name,
 
@@ -47,6 +49,15 @@ public class RequestEmployee {
     ){
         public EmployeeEntity toEntity() {
             EmployeeEntity entity = new EmployeeEntity();
+
+            updateEntity(entity);
+
+            entity.setCreatedAt(Instant.now());
+
+            return entity;
+        }
+
+        public EmployeeEntity updateEntity(EmployeeEntity entity) {
             entity.setName(name);
             entity.setEmployeeNumber(employeeNumber);
             entity.setHireYear(hireYear);
@@ -55,18 +66,24 @@ public class RequestEmployee {
             entity.setEmploymentStatus(EmploymentStatus.fromDisplayName(employmentStatus));
             entity.setWorkLocation(WorkLocation.fromDisplayName(workLocation));
             entity.setDeptName(deptName);
-            entity.setCreatedAt(Instant.now());
             entity.setUpdatedAt(Instant.now());
 
             return entity;
         }
+
+
         public EmployeeDetailEntity toDetailEntity(EmployeeEntity employee) {
             EmployeeDetailEntity detailEntity = new EmployeeDetailEntity();
+            updateDetailEntity(detailEntity);
+            detailEntity.setEmployee(employee);
+
+            return detailEntity;
+        }
+
+        public EmployeeDetailEntity updateDetailEntity(EmployeeDetailEntity detailEntity) {
             detailEntity.setEmail(email);
             detailEntity.setPhoneNumber(phoneNumber);
             detailEntity.setRemark(remark);
-            detailEntity.setEmployee(employee);
-
             return detailEntity;
         }
 
@@ -75,7 +92,6 @@ public class RequestEmployee {
             evaluationEntity.setEmployee(employee);
             evaluationEntity.setCreatedAt(Instant.now());
             evaluationEntity.setTotalScore(0);
-//            evaluationEntity.setIncreaseRate(0L);
             return evaluationEntity;
         }
     }

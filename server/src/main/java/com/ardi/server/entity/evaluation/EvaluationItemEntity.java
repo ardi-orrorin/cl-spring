@@ -9,6 +9,7 @@ import lombok.Setter;
 import org.apache.catalina.connector.Response;
 
 import java.time.Instant;
+import java.util.List;
 
 @Entity
 @Table(name = "evaluation_items")
@@ -27,12 +28,12 @@ public class EvaluationItemEntity {
     private Instant createdAt;
     private Instant updatedAt;
 
-    @ManyToOne
-    @JoinColumn(name = "evaluation_category_idx", insertable = false, updatable = false)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "evaluation_category_idx")
     private EvaluationCategoryEntity evaluationCategory;
 
-    @OneToOne
-    private EmployeesEvaluationItemEntity employeesEvaluationItem;
+    @OneToMany(mappedBy = "evaluationItem", fetch = FetchType.LAZY)
+    private List<EmployeesEvaluationItemEntity> employeesEvaluationItems;
 
     public ResponseEvaluationItem.Summary toSummary() {
         return new ResponseEvaluationItem.Summary(
@@ -49,6 +50,17 @@ public class EvaluationItemEntity {
             idx,
             name,
             score
+        );
+    }
+
+    public ResponseEvaluationItem.Detail toDetail() {
+        return new ResponseEvaluationItem.Detail(
+            idx,
+            name,
+            score,
+            isUsed,
+            remark,
+            evaluationCategory.getIdx()
         );
     }
 }

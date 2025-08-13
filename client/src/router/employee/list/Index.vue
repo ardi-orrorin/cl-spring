@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { onBeforeMount, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import EmployeeServiceApi from '../(feature)/(serivce)/api';
-import type { EmployeeServiceType } from '../(feature)/(serivce)/type';
-import DetailModal from '../(feature)/component/DetailModal.vue';
+import DetailModal from '../(feature)/components/DetailModal.vue';
+import EmployeeServiceApi from '../(feature)/serivces/api';
+import type { EmployeeServiceType } from '../(feature)/serivces/type';
 
 const route = useRoute();
 const router = useRouter();
@@ -78,41 +78,34 @@ const closeDetailModal = () => {
   showDetailModal.value = false;
   selectedEmployeeId.value = null;
 };
-
-const handleEdit = (employeeId: number) => {
-  closeDetailModal();
-};
 </script>
 
 <template>
-  <div class="container-fluid">
-    <div class="pt-3 pb-2 mb-3">
+  <div class="container-fluid py-4">
+    <div>
       <h1 class="h2">사원 조회</h1>
-
-      <div class="container text-center w-100">
-        <div class="row row-cols-4">
-          <div class="col ps-0">
-            <input type="text" class="form-control" placeholder="사원명" v-model="searchParams.name" />
-          </div>
-          <div class="col">
-            <select class="form-select w-100" aria-label="근무상태" v-model="searchParams.employmentStatus">
-              <option value="">근무상태</option>
-              <option v-for="item in status.employmentStatuses" :key="item" :value="item">{{ item }}</option>
-            </select>
-          </div>
-          <div class="col">
-            <select class="form-select w-100" aria-label="근무지역" v-model="searchParams.workLocation">
-              <option value="">근무지역</option>
-              <option v-for="item in status.workLocations" :key="item" :value="item">{{ item }}</option>
-            </select>
-          </div>
-          <div class="col">
-            <button class="btn btn-primary w-100" @click="searchEmployeeList">검색</button>
-          </div>
+      <div class="my-3 text-center w-100 row row-cols-4 g-2">
+        <div class="col ps-0">
+          <input type="text" class="form-control" placeholder="사원명" v-model="searchParams.name" />
+        </div>
+        <div class="col">
+          <select class="form-select w-100" aria-label="근무상태" v-model="searchParams.employmentStatus">
+            <option value="">근무상태</option>
+            <option v-for="item in status.employmentStatuses" :key="item" :value="item">{{ item }}</option>
+          </select>
+        </div>
+        <div class="col">
+          <select class="form-select w-100" aria-label="근무지역" v-model="searchParams.workLocation">
+            <option value="">근무지역</option>
+            <option v-for="item in status.workLocations" :key="item" :value="item">{{ item }}</option>
+          </select>
+        </div>
+        <div class="col">
+          <button class="btn btn-primary w-100" @click="searchEmployeeList">검색</button>
         </div>
       </div>
     </div>
-    <table class="table table-striped table-hover">
+    <table class="table table-striped table-hover table-bordered">
       <thead>
         <tr>
           <th scope="col">#</th>
@@ -136,17 +129,24 @@ const handleEdit = (employeeId: number) => {
         <tr v-else-if="data && data && data.length === 0">
           <td colspan="9" class="text-center">데이터가 없습니다.</td>
         </tr>
-        <tr v-else v-for="(value, idx) in data" :key="idx">
+        <tr
+          v-else
+          v-for="(value, idx) in data"
+          :key="idx"
+          @click="router.push(`/employee/create?edit=true&idx=${value.idx}`)"
+        >
           <td>{{ idx + 1 }}</td>
           <td>{{ value.name }}</td>
           <td>{{ value.employeeNumber }}</td>
           <td>{{ value.hireYear }}</td>
-          <td>{{ value.currentAnnualSalary }}</td>
+          <td>
+            <span class="fw-bold">{{ value.currentAnnualSalary?.toLocaleString() }}</span>
+          </td>
           <td>{{ value.jobTitle }}</td>
           <td>{{ value.employmentStatus }}</td>
           <td>{{ value.workLocation }}</td>
           <td>
-            <button class="btn btn-primary btn-sm me-2" @click="openDetailModal(value.idx)">상세</button>
+            <button class="btn btn-outline-primary btn-sm me-2" @click.stop="openDetailModal(value.idx)">상세</button>
           </td>
         </tr>
       </tbody>
@@ -157,12 +157,7 @@ const handleEdit = (employeeId: number) => {
       <button class="btn btn-success">사원 등록 (Excel)</button>
     </div>
 
-    <DetailModal
-      :show="showDetailModal"
-      :employee-id="selectedEmployeeId"
-      @close="closeDetailModal"
-      @edit="handleEdit"
-    />
+    <DetailModal :show="showDetailModal" :employee-id="selectedEmployeeId" @close="closeDetailModal" />
   </div>
 </template>
 

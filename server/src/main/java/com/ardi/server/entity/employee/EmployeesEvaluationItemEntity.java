@@ -7,7 +7,11 @@ import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table(name = "employees_evaluation_items")
+@Table(name = "employees_evaluation_items", 
+       uniqueConstraints = @UniqueConstraint(
+           name = "employees_evaluation_idx", 
+           columnNames = {"employees_evaluation_idx", "evaluation_item_idx"}
+       ))
 @Getter
 @Setter
 @RequiredArgsConstructor
@@ -17,9 +21,11 @@ public class EmployeesEvaluationItemEntity {
     private long idx;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "employees_evaluation_idx")
     private EmployeesEvaluationEntity employeesEvaluation;
 
-    @OneToOne
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "evaluation_item_idx")
     private EvaluationItemEntity evaluationItem;
 
 }

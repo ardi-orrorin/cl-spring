@@ -45,6 +45,13 @@ public class EmployeeService {
         return ResponseStatus.success("Success",  data);
     }
 
+    public ResponseStatus<ResponseEmployee.Detail> findByIdx(long idx) {
+        EmployeeEntity entity = employeeRepository.findById(idx)
+            .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사원입니다."));
+
+        return ResponseStatus.success("Success", entity.toDetail());
+    }
+
     // 사원 등록시 사용할 사원 상태 정보 조회
     @Cacheable(value = "employeeStatus")
     public ResponseStatus<Map<String, List<String>>> findEmployeeStatus() {
@@ -83,5 +90,16 @@ public class EmployeeService {
         employeesEvaluationRepository.save(evaluationEntity);
 
         return ResponseStatus.successBoolean("Created successfully");
+    }
+
+    @Transactional
+    public ResponseStatus<Boolean> update( RequestEmployee.Create req) {
+        EmployeeEntity entity = employeeRepository.findById(req.idx())
+            .orElseThrow(() -> new RuntimeException("Employee not found"));
+
+        req.updateEntity(entity);
+        req.updateDetailEntity(entity.getEmployeeDetail());
+
+        return ResponseStatus.successBoolean("Updated successfully");
     }
 }
