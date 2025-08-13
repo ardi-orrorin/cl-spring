@@ -10,8 +10,8 @@ npm i
 
 [env 파일](./.env)
 
-VITE_SERVER_URL = 서버 주소  
-VITE_API_BASE_URL = API Prefix
+VITE_SERVER_URL = 서버 주소
+VITE_API_PREFIX_URL = API Prefix
 
 ### 3. run dev
 
