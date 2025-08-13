@@ -27,7 +27,6 @@ const evaluationItemIdx = computed(() => {
   return route.query.idx ? Number(route.query.idx) : null;
 });
 
-// Format score with commas for display
 const formattedScore = computed(() => {
   if (!body.value.score) return '';
   return body.value.score.toLocaleString();

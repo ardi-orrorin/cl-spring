@@ -14,16 +14,16 @@ import {
 } from 'chart.js';
 import { onBeforeMount, ref } from 'vue';
 import { Bar, Line } from 'vue-chartjs';
+import KpiCard from '../(feature)/components/KpiCard.vue';
+import PerformersCard from '../(feature)/components/PerformersCard.vue';
 import ReportServiceApi from '../(feature)/services/api';
 import type { ReportType } from '../(feature)/services/type';
 
-// Chart.js 등록
 ChartJS.register(CategoryScale, LinearScale, BarElement, LineElement, PointElement, Title, Tooltip, Legend, Filler);
 
 const reportData = ref<ReportType.Report[]>([]);
 const loading = ref(false);
 
-// KPI 데이터
 const kpiData = ref({
   currentEmployees: 6,
   retiredEmployees: 1,
@@ -77,7 +77,6 @@ const calculateKPIs = () => {
   };
 };
 
-// 차트 데이터 생성
 const salaryChartData = ref({
   labels: [] as string[],
   datasets: [
@@ -151,7 +150,6 @@ const performanceChartOptions = {
   },
 };
 
-// 차트 데이터 업데이트
 const updateChartData = () => {
   if (reportData.value.length === 0) return;
 
@@ -183,48 +181,21 @@ const refreshData = async () => {
   updateChartData();
   calculateRankings();
 };
-
-// 초기 데이터 로드
 </script>
 
 <template>
   <div class="container-fluid py-4">
-    <!-- 제목 -->
     <div class="d-flex justify-content-between align-items-center mb-4">
       <h2 class="fw-bold text-dark">사원 평가 보고서</h2>
     </div>
 
-    <!-- KPI 카드 -->
     <div class="row g-4 mb-4">
-      <div class="col-lg-3 col-md-6">
-        <div class="card h-100 border-0">
-          <div class="card-body text-center">
-            <h6 class="card-subtitle mb-2 text-muted">근무 인원수</h6>
-            <h3 class="card-title text-primary fw-bold">{{ kpiData.currentEmployees }} 명</h3>
-          </div>
-        </div>
-      </div>
+      <KpiCard title="근무 인원수" :value="kpiData.currentEmployees + ' 명'" />
+      <KpiCard title="퇴직 인원수" :value="kpiData.retiredEmployees + ' 명'" />
+      <KpiCard title="평균 연봉 상승률" :value="kpiData.averageIncreaseRate + '%'" />
 
       <div class="col-lg-3 col-md-6">
-        <div class="card h-100 border-0">
-          <div class="card-body text-center">
-            <h6 class="card-subtitle mb-2 text-muted">퇴직 인원수</h6>
-            <h3 class="card-title text-warning fw-bold">{{ kpiData.retiredEmployees }} 명</h3>
-          </div>
-        </div>
-      </div>
-
-      <div class="col-lg-3 col-md-6">
-        <div class="card h-100 border-0">
-          <div class="card-body text-center">
-            <h6 class="card-subtitle mb-2 text-muted">평균 연봉 상승률</h6>
-            <h3 class="card-title text-success fw-bold">{{ kpiData.averageIncreaseRate }}%</h3>
-          </div>
-        </div>
-      </div>
-
-      <div class="col-lg-3 col-md-6">
-        <div class="card h-100 border-0">
+        <div class="card h-100 border-1">
           <div class="card-body text-center">
             <h6 class="card-subtitle mb-2 text-muted">총 인건비 변화</h6>
             <div class="d-flex justify-content-center align-items-center">
@@ -237,9 +208,7 @@ const refreshData = async () => {
           </div>
         </div>
       </div>
-    </div>
 
-    <div class="row g-4 mb-4">
       <div class="col-lg-6">
         <div class="card h-100 border-0">
           <div class="card-header bg-white border-0">
@@ -286,91 +255,8 @@ const refreshData = async () => {
     </div>
 
     <div class="row g-4">
-      <!-- 우수사원 섹션 -->
-      <div class="col-lg-6">
-        <div class="card border-1 py-3">
-          <div class="d-flex align-items-center justify-content-center">
-            <div class="text-center">
-              <small class="card-title mb-0">우수사원 (최고 점수)</small>
-              <h5 class="text-muted" v-if="topPerformers.length > 0">
-                {{ topPerformers[0].employeeName }} ({{ topPerformers[0].totalScore }}점)
-              </h5>
-            </div>
-          </div>
-        </div>
-        <div class="mt-4 card-body">
-          <h6 class="fw-bold mb-3">상위 10% 사원 리스트</h6>
-          <div class="table-responsive">
-            <table class="table table-sm table-hover table-bordered">
-              <thead class="table-secondary">
-                <tr>
-                  <th>순위</th>
-                  <th>사원명</th>
-                  <th>점수</th>
-                  <th>상승 연봉</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr
-                  v-for="(employee, index) in topPerformers"
-                  :key="employee.employeeEvaluationIdx"
-                  class="align-middle"
-                >
-                  <td>{{ index + 1 }}</td>
-                  <td>{{ employee.employeeName }}</td>
-                  <td>{{ employee.totalScore }}점</td>
-                  <td>₩{{ employee.nextAnnualSalary.toLocaleString() }}</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-
-      <!-- 최하사원 섹션 -->
-      <div class="col-lg-6">
-        <div class="card border-1 py-3">
-          <div class="d-flex align-items-center justify-content-center">
-            <div class="text-center">
-              <small class="mb-0">최하사원 (최저 점수)</small>
-              <h5 class="text-muted" v-if="bottomPerformers.length > 0">
-                {{ bottomPerformers[0].employeeName }} ({{ bottomPerformers[0].totalScore }}점)
-              </h5>
-            </div>
-          </div>
-        </div>
-        <div class="mt-4 card-body">
-          <h6 class="fw-bold mb-3">하위 10% 사원 리스트</h6>
-          <div class="table-responsive">
-            <table class="table table-sm table-bordered table-hover">
-              <thead class="table-secondary">
-                <tr>
-                  <th>순위</th>
-                  <th>사원명</th>
-                  <th>점수</th>
-                  <th>상승 연봉</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr
-                  v-for="(employee, index) in bottomPerformers"
-                  :key="employee.employeeEvaluationIdx"
-                  class="align-middle"
-                >
-                  <td>
-                    <span>{{ index + 1 }}</span>
-                  </td>
-                  <td>{{ employee.employeeName }}</td>
-                  <td>
-                    <span>{{ employee.totalScore }}점</span>
-                  </td>
-                  <td>₩{{ employee.nextAnnualSalary.toLocaleString() }}</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
+      <PerformersCard :performers="topPerformers" />
+      <PerformersCard :performers="bottomPerformers" />
     </div>
   </div>
 </template>

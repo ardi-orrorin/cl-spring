@@ -99,7 +99,7 @@ const searchEvaluationItemList = () => {
       </div>
     </div>
     <table class="table table-striped table-hover table-bordered">
-      <thead>
+      <thead class="table-light">
         <tr>
           <th scope="col">#</th>
           <th scope="col">평가 항목명</th>
@@ -150,8 +150,4 @@ const searchEvaluationItemList = () => {
   </div>
 </template>
 
-<style scoped>
-.table th {
-  background-color: #f8f9fa;
-}
-</style>
+<style scoped></style>

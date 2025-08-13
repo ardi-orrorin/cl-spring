@@ -9,7 +9,6 @@ import type { EvaluationEmployeeType } from './(feature)/services/type';
 const employeeEvaluations = ref<EvaluationEmployeeType.List[]>([]);
 const availableEvaluationItemIdxs = ref([] as (EvaluationItemType.Item.Select & { index: number })[]);
 
-// 프로젝트 모달 상태
 const showProjectModal = ref(false);
 const selectedEmployee = ref<{ idx: number; name: string; employeesEvaluationIdx: number } | null>(null);
 const employeeProjects = ref<Record<number, EvaluationEmployeeType.Project.Detail[]>>({});
@@ -18,7 +17,6 @@ onBeforeMount(() => {
   Promise.allSettled([loadEmployees(), loadAvailableEvaluationItemIdxs()]);
 });
 
-// 평가 항목 변경을 감지하여 총점 자동 계산
 watch(
   () => employeeEvaluations.value.map((emp) => emp.evaluationItemIdxs),
   () => {
@@ -161,25 +159,15 @@ const closeProjectModal = () => {
           <table class="table table-hover mb-0" style="table-layout: auto">
             <colgroup>
               <col style="width: 8%" />
-              <!-- 사원명 -->
               <col style="width: 10%" />
-              <!-- 사번 -->
               <col style="width: 8%" />
-              <!-- 연차 -->
               <col style="width: 12%" />
-              <!-- 연봉(현재) -->
               <col style="width: 25%" />
-              <!-- 평가 항목 / 점수 -->
               <col style="width: 8%" />
-              <!-- Total 점수 -->
               <col style="width: 12%" />
-              <!-- 연봉 상승률(%) -->
               <col style="width: 12%" />
-              <!-- 상승 후 연봉 -->
               <col style="width: 10%" />
-              <!-- 메모 -->
               <col style="width: 5%" />
-              <!-- 저장 -->
             </colgroup>
             <thead class="table-light">
               <tr>
@@ -287,7 +275,7 @@ const closeProjectModal = () => {
                   </div>
                 </td>
 
-                <td class="text-center border-end fw-bold text-success">
+                <td class="text-center border-end">
                   ₩{{
                     calculateFinalSalary(
                       employeeEvaluation.currentAnnualSalary,
@@ -329,7 +317,7 @@ const closeProjectModal = () => {
                 </td>
 
                 <td class="text-center">
-                  <button class="btn btn-success btn-sm fw-medium" @click="handleSubmit(employeeEvaluation.idx)">
+                  <button class="btn btn-primary btn-sm fw-medium" @click="handleSubmit(employeeEvaluation.idx)">
                     저장
                   </button>
                 </td>
