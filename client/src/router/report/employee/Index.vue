@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { EmployeeServiceType } from '@/router/employee/(feature)/serivces/type';
 import {
   BarElement,
   CategoryScale,
@@ -21,10 +20,10 @@ import type { ReportType } from '../(feature)/services/type';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, LineElement, PointElement, Title, Tooltip, Legend, Filler);
 
-const reportData = ref<ReportType.Report[]>([]);
-const retiredEmployees = ref<ReportType.Report[]>([]);
-const topPerformers = ref<ReportType.Report[]>([]);
-const bottomPerformers = ref<ReportType.Report[]>([]);
+const reportData = ref<ReportType.EmployeeEvaluation[]>([]);
+const resignCount = ref(0);
+const topPerformers = ref<ReportType.EmployeeEvaluation[]>([]);
+const bottomPerformers = ref<ReportType.EmployeeEvaluation[]>([]);
 
 const loading = ref(false);
 
@@ -46,11 +45,8 @@ const loadReportData = async () => {
   loading.value = true;
   try {
     const response = await ReportServiceApi.findAllUserReport();
-    reportData.value =
-      response.data.data.filter((emp) => emp.employmentStatus !== EmployeeServiceType.EmploymentStatus.RETIRED) || [];
-    retiredEmployees.value = response.data.data.filter(
-      (emp) => emp.employmentStatus === EmployeeServiceType.EmploymentStatus.RETIRED,
-    );
+    reportData.value = response.data.data.employeeEvaluations || [];
+    resignCount.value = response.data.data.resignCount;
     calculateKPIs();
   } catch (error) {
     console.error('리포트 데이터 로딩 실패:', error);
@@ -66,7 +62,7 @@ const calculateKPIs = () => {
   const totalNext = reportData.value.reduce((sum, emp) => sum + emp.nextAnnualSalary, 0);
   const avgIncrease = reportData.value.reduce((sum, emp) => sum + emp.increaseRate, 0) / reportData.value.length;
 
-  const retiredCount = retiredEmployees.value.length;
+  const retiredCount = resignCount.value;
 
   const workingCount = reportData.value.length;
 

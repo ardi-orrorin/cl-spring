@@ -1,11 +1,14 @@
 package com.ardi.server.service.employee;
 
 import com.ardi.server.dto.common.ResponseStatus;
+import com.ardi.server.dto.employee.EmploymentStatus;
 import com.ardi.server.dto.employee.request.RequestEmployeeEvaluation;
 import com.ardi.server.dto.employee.response.ResponseEmployeeEvaluation;
+import com.ardi.server.entity.employee.EmployeeEntity;
 import com.ardi.server.entity.employee.EmployeesEvaluationEntity;
 import com.ardi.server.entity.employee.EmployeesEvaluationItemEntity;
 import com.ardi.server.entity.evaluation.EvaluationItemEntity;
+import com.ardi.server.repository.employee.EmployeeRepository;
 import com.ardi.server.repository.employee.EmployeesEvaluationItemRepository;
 import com.ardi.server.repository.employee.EmployeesEvaluationRepository;
 import com.ardi.server.repository.evaluation.EvaluationItemRepository;
@@ -13,6 +16,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Service
@@ -22,19 +26,39 @@ public class EmployeeEvaluationService {
     private final EvaluationItemRepository evaluationItemRepository;
     private final EmployeesEvaluationRepository employeesEvaluationRepository;
     private final EmployeesEvaluationItemRepository employeesEvaluationItemRepository;
+    private final EmployeeRepository employeeRepository;
 
-    public ResponseStatus<List<ResponseEmployeeEvaluation.Report>> findAlUserReport() {
-        List<EmployeesEvaluationEntity> entities = employeesEvaluationRepository.findAll();
-        List<ResponseEmployeeEvaluation.Report> data = entities.stream()
-            .map(EmployeesEvaluationEntity::toReport)
+    public ResponseStatus<ResponseEmployeeEvaluation.Report> findAlUserReport() {
+        List<EmployeesEvaluationEntity> entities = employeesEvaluationRepository
+            .findAllByEvaluationYearAndEmployeeEmploymentStatusNot(LocalDate.now().getYear(), EmploymentStatus.RESIGNED);
+
+        List<ResponseEmployeeEvaluation.EmployeeEvaluation> data = entities.stream()
+            .map(EmployeesEvaluationEntity::toResEmployeeEvaluation)
             .toList();
 
-        return ResponseStatus.success("Employee evaluation list", data);
-    }
+        int resignCount = employeeRepository.countByEmploymentStatus(EmploymentStatus.RESIGNED);
+
+        ResponseEmployeeEvaluation.Report report = new ResponseEmployeeEvaluation.Report(resignCount, data);
+
+        return ResponseStatus.success("Employee evaluation list", report);    }
 
     public ResponseStatus<List<ResponseEmployeeEvaluation.List>> findAll() {
-        List<ResponseEmployeeEvaluation.List> data = employeesEvaluationRepository.findAll()
-            .stream()
+        List<EmployeeEntity> employeeEntities = employeeRepository.findAllByEmploymentStatusNot(EmploymentStatus.RESIGNED);
+
+        List<EmployeesEvaluationEntity> currentYearEmployeesEvaluationEntities = employeeEntities.stream()
+            .map(employeeEntity -> {
+                if(employeeEntity.getEmployeesEvaluations().isEmpty()) {
+                    return EmployeesEvaluationEntity.create(employeeEntity);
+                } else {
+                    return employeeEntity.getEmployeesEvaluations().stream()
+                        .filter(employeesEvaluationEntity ->
+                            employeesEvaluationEntity.getEvaluationYear() == LocalDate.now().getYear())
+                        .findFirst()
+                        .orElse(EmployeesEvaluationEntity.create(employeeEntity));
+                }}
+            ).toList();
+
+        List<ResponseEmployeeEvaluation.List> data = currentYearEmployeesEvaluationEntities.stream()
             .map(EmployeesEvaluationEntity::toList)
             .toList();
 
@@ -43,22 +67,16 @@ public class EmployeeEvaluationService {
 
     @Transactional
     public ResponseStatus<Boolean> update(RequestEmployeeEvaluation.Update req) {
+        if(req.idx() == 0) { // 새로운 평가 생성
+            return save(req);
+        }
+
         EmployeesEvaluationEntity employeesEvaluationEntity = employeesEvaluationRepository.findById(req.idx())
             .orElseThrow(() -> new IllegalArgumentException("Employee evaluation not found"));
 
         employeesEvaluationEntity.setIncreaseRate(req.increaseRate());
 
-        List<EvaluationItemEntity> evaluationItemEntities = List.of();
-
-        if (!req.evaluationItemIdxs().isEmpty()) {
-            evaluationItemEntities = evaluationItemRepository.findAllByIdxIn(req.evaluationItemIdxs());
-            int totalScore = evaluationItemEntities
-                .stream()
-                .reduce(0, (acc, evaluationItemEntity) ->
-                    acc + evaluationItemEntity.getScore(), Integer::sum
-                );
-            employeesEvaluationEntity.setTotalScore(totalScore);
-        }
+        List<EvaluationItemEntity> evaluationItemEntities = addEvaluationItemAndTotalScore(req, employeesEvaluationEntity);
 
 
         long nextAnnualSalary = calculateNextAnnualSalary(
@@ -70,6 +88,29 @@ public class EmployeeEvaluationService {
 
         employeesEvaluationRepository.save(employeesEvaluationEntity);
 
+
+        saveEmployeeEvaluationItemSave(evaluationItemEntities, employeesEvaluationEntity);
+
+        return ResponseStatus.successBoolean("Employee evaluation saved successfully");
+    }
+
+    @Transactional
+    public ResponseStatus<Boolean> save(RequestEmployeeEvaluation.Update req) {
+        EmployeeEntity employeeEntity = employeeRepository.findById(req.employeeIdx())
+            .orElseThrow(() -> new IllegalArgumentException("Employee not found"));
+        EmployeesEvaluationEntity employeesEvaluationEntity = req.toEntity(employeeEntity);
+
+        List<EvaluationItemEntity> evaluationItemEntities = addEvaluationItemAndTotalScore(req, employeesEvaluationEntity);
+
+
+        long nextAnnualSalary = calculateNextAnnualSalary(
+            req.increaseRate(),
+            employeesEvaluationEntity.getEmployee().getCurrentAnnualSalary()
+        );
+
+        employeesEvaluationEntity.setNextAnnualSalary(nextAnnualSalary);
+
+        employeesEvaluationRepository.save(employeesEvaluationEntity);
 
         saveEmployeeEvaluationItemSave(evaluationItemEntities, employeesEvaluationEntity);
 
@@ -125,5 +166,20 @@ public class EmployeeEvaluationService {
             
             employeesEvaluationItemRepository.saveAll(newEmployeesEvaluationItemEntities);
         }
+    }
+
+    private List<EvaluationItemEntity> addEvaluationItemAndTotalScore(RequestEmployeeEvaluation.Update req, EmployeesEvaluationEntity employeesEvaluationEntity) {
+        List<EvaluationItemEntity> evaluationItemEntities = List.of();
+
+        if (!req.evaluationItemIdxs().isEmpty()) {
+            evaluationItemEntities = evaluationItemRepository.findAllByIdxIn(req.evaluationItemIdxs());
+            int totalScore = evaluationItemEntities
+                .stream()
+                .reduce(0, (acc, evaluationItemEntity) ->
+                    acc + evaluationItemEntity.getScore(), Integer::sum
+                );
+            employeesEvaluationEntity.setTotalScore(totalScore);
+        }
+        return evaluationItemEntities;
     }
 }

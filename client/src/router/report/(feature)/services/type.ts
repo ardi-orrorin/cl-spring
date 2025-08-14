@@ -1,6 +1,6 @@
 import type { EmployeeServiceType } from '@/router/employee/(feature)/serivces/type';
 
-type ReportT = {
+type EmployeeEvaluationT = {
   employeeEvaluationIdx: number;
   employeeName: string;
   employmentStatus: EmployeeServiceType.EmploymentStatus;
@@ -10,6 +10,12 @@ type ReportT = {
   totalScore: number;
 };
 
+type ReportT = {
+  resignCount: number;
+  employeeEvaluations: EmployeeEvaluationT[];
+};
+
 export namespace ReportType {
+  export type EmployeeEvaluation = EmployeeEvaluationT;
   export type Report = ReportT;
 }

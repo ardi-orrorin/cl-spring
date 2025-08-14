@@ -86,8 +86,8 @@ public class EmployeeService {
         EmployeeDetailEntity detailEntity = req.toDetailEntity(entity);
         employeeDetailRepository.save(detailEntity);
 
-        EmployeesEvaluationEntity evaluationEntity = req.toEvaluationEntity(entity);
-        employeesEvaluationRepository.save(evaluationEntity);
+//        EmployeesEvaluationEntity evaluationEntity = req.toEvaluationEntity(entity);
+//        employeesEvaluationRepository.save(evaluationEntity);
 
         return ResponseStatus.successBoolean("Created successfully");
     }

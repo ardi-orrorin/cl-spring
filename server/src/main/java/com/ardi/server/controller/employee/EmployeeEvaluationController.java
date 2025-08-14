@@ -26,8 +26,8 @@ public class EmployeeEvaluationController {
     }
 
     @GetMapping("/report")
-    public ResponseEntity<ResponseStatus<List<ResponseEmployeeEvaluation.Report>>> findAllReport() {
-        ResponseStatus<List<ResponseEmployeeEvaluation.Report>> result =
+    public ResponseEntity<ResponseStatus<ResponseEmployeeEvaluation.Report>> findAllReport() {
+        ResponseStatus<ResponseEmployeeEvaluation.Report> result =
             employeeEvaluationService.findAlUserReport();
 
         return ResponseEntity.ok(result);

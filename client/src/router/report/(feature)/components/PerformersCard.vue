@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { ReportType } from '../services/type';
 
-defineProps<{ performers: ReportType.Report[] }>();
+defineProps<{ performers: ReportType.EmployeeEvaluation[] }>();
 </script>
 
 <template>
@@ -23,7 +23,7 @@ defineProps<{ performers: ReportType.Report[] }>();
               <th>순위</th>
               <th>사원명</th>
               <th>점수</th>
-              <th>상승 연봉</th>
+              <th>상승 후 연봉</th>
             </tr>
           </thead>
           <tbody>

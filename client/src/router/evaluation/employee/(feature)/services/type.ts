@@ -1,5 +1,6 @@
 type ListT = {
   idx: number;
+  employeeIdx: number;
   employeeName: string;
   hireYear: string;
   employeeNumber: string;
@@ -11,6 +12,7 @@ type ListT = {
 
 type UpdateT = {
   idx: number;
+  employeeIdx: number;
   evaluationItemIdxs: number[];
   increaseRate: number;
 };

@@ -190,7 +190,7 @@ const parseExcelFile = async (file: File) => {
           <td>{{ value.employeeNumber }}</td>
           <td>{{ value.hireYear }}</td>
           <td>
-            <span class="fw-bold">{{ value.currentAnnualSalary?.toLocaleString() }}</span>
+            <span class="fw-bold">₩{{ value.currentAnnualSalary?.toLocaleString() }}</span>
           </td>
           <td>{{ value.jobTitle }}</td>
           <td>{{ value.employmentStatus }}</td>

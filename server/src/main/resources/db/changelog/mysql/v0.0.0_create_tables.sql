@@ -58,6 +58,7 @@ CREATE TABLE IF NOT EXISTS employees_evaluations
     total_score                INT NOT NULL DEFAULT 0 COMMENT '총점',
     increase_rate              INT NOT NULL DEFAULT 0 COMMENT '인상률',
     next_annual_salary         BIGINT NOT NULL DEFAULT 0 COMMENT '차년도연봉',
+    evaluation_year            INT NOT NULL COMMENT '평가년도',
     created_at                 TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT '생성일시'
 );
 -- rollback DROP TABLE IF EXISTS employees_evaluation_items CASCADE;
@@ -116,7 +117,7 @@ ALTER TABLE evaluation_items
     ADD UNIQUE ( name, evaluation_category_idx );
 
 ALTER TABLE employees_evaluations
-    ADD UNIQUE ( employee_idx );
+    ADD UNIQUE ( employee_idx, evaluation_year );
 
 ALTER TABLE employees_evaluation_items
     ADD UNIQUE ( employees_evaluation_idx, evaluation_item_idx );

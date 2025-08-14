@@ -11,6 +11,7 @@
 ![alt text](./resources/img/web01.jpg)
 ![alt text](./resources/img/web02.jpg)
 ![alt text](./resources/img/web03.jpg)
+![alt text](./resources/img/web04.jpg)
 
 ## 1. Server 개발 설정
 

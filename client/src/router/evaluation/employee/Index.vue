@@ -34,8 +34,6 @@ watch(
 const loadAvailableEvaluationItemIdxs = async () => {
   try {
     const res = await EvaluationItemServiceApi.select();
-    console.log(res);
-
     availableEvaluationItemIdxs.value = res.data.data.map((item, index) => ({
       ...item,
       index,
@@ -57,12 +55,15 @@ const loadEmployees = async () => {
 };
 
 const calculateFinalSalary = (currentSalary: number, increaseRate: number) => {
-  console.log(currentSalary, increaseRate);
-
   return currentSalary * (1 + increaseRate / 100);
 };
 
 const addEvaluationItem = (employeeEvaluationIdx: number) => {
+  if (availableEvaluationItemIdxs.value.length === 0) {
+    alert('평가 항목이 없습니다. 평가 항목을 추가해주세요.');
+    return;
+  }
+
   const oldEmployeeEvaluation = employeeEvaluations.value.find(
     (employeeEvaluation) => employeeEvaluation.idx === employeeEvaluationIdx,
   );
@@ -120,13 +121,13 @@ const handleSubmit = async (employeeEvaluationIdx: number) => {
 
   const body = {
     idx: employeeEvaluationIdx,
+    employeeIdx: employeeEvaluation.employeeIdx,
     evaluationItemIdxs: employeeEvaluation.evaluationItemIdxs,
     increaseRate: employeeEvaluation.increaseRate,
   };
 
   try {
-    const res = await EvaluationEmployeeServiceApi.update(body);
-    console.log(res);
+    await EvaluationEmployeeServiceApi.update(body);
 
     alert('직원 평가 저장 성공');
     loadEmployees();
@@ -158,16 +159,16 @@ const closeProjectModal = () => {
         <div class="table-responsive">
           <table class="table table-hover mb-0" style="table-layout: auto">
             <colgroup>
-              <col style="width: 8%" />
-              <col style="width: 10%" />
-              <col style="width: 8%" />
+              <col style="width: 6%" />
+              <col style="min-width: 80px" />
+              <col style="min-width: 60px" />
               <col style="width: 12%" />
-              <col style="width: 25%" />
-              <col style="width: 8%" />
+              <col style="width: 23%" />
+              <col style="min-width: 70px" />
               <col style="width: 12%" />
               <col style="width: 12%" />
-              <col style="width: 10%" />
-              <col style="width: 5%" />
+              <col style="min-width: 100px" />
+              <col style="min-width: 70px" />
             </colgroup>
             <thead class="table-light">
               <tr>
@@ -176,7 +177,7 @@ const closeProjectModal = () => {
                 <th scope="col" class="text-center border-end">연차</th>
                 <th scope="col" class="text-center border-end">연봉(현재)</th>
                 <th scope="col" class="text-center border-end">평가 항목 / 점수</th>
-                <th scope="col" class="text-center border-end">Total 점수</th>
+                <th scope="col" class="text-center border-end">총 점수</th>
                 <th scope="col" class="text-center border-end">연봉 상승률(%)</th>
                 <th scope="col" class="text-center border-end">상승 후 연봉</th>
                 <th scope="col" class="text-center border-end">프로젝트</th>
