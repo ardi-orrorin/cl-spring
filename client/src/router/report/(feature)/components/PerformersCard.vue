@@ -5,14 +5,12 @@ defineProps<{ performers: ReportType.Report[] }>();
 </script>
 
 <template>
-  <div class="col-lg-6">
+  <div class="col-lg-6" v-if="performers.length > 0">
     <div class="card border-1 py-3">
       <div class="d-flex align-items-center justify-content-center">
         <div class="text-center">
           <small class="card-title mb-0">우수사원 (최고 점수)</small>
-          <h5 class="text-muted" v-if="performers.length > 0">
-            {{ performers[0].employeeName }} ({{ performers[0].totalScore }}점)
-          </h5>
+          <h5 class="text-muted">{{ performers[0].employeeName }} ({{ performers[0].totalScore }}점)</h5>
         </div>
       </div>
     </div>

@@ -22,15 +22,19 @@ import type { ReportType } from '../(feature)/services/type';
 ChartJS.register(CategoryScale, LinearScale, BarElement, LineElement, PointElement, Title, Tooltip, Legend, Filler);
 
 const reportData = ref<ReportType.Report[]>([]);
+const retiredEmployees = ref<ReportType.Report[]>([]);
+const topPerformers = ref<ReportType.Report[]>([]);
+const bottomPerformers = ref<ReportType.Report[]>([]);
+
 const loading = ref(false);
 
 const kpiData = ref({
-  currentEmployees: 6,
-  retiredEmployees: 1,
-  averageIncreaseRate: 6.2,
+  currentEmployees: 0,
+  retiredEmployees: 0,
+  averageIncreaseRate: 0,
   totalSalaryChange: {
-    from: 250000000,
-    to: 266390000,
+    from: 0,
+    to: 0,
   },
 });
 
@@ -42,7 +46,11 @@ const loadReportData = async () => {
   loading.value = true;
   try {
     const response = await ReportServiceApi.findAllUserReport();
-    reportData.value = response.data.data || [];
+    reportData.value =
+      response.data.data.filter((emp) => emp.employmentStatus !== EmployeeServiceType.EmploymentStatus.RETIRED) || [];
+    retiredEmployees.value = response.data.data.filter(
+      (emp) => emp.employmentStatus === EmployeeServiceType.EmploymentStatus.RETIRED,
+    );
     calculateKPIs();
   } catch (error) {
     console.error('리포트 데이터 로딩 실패:', error);
@@ -58,13 +66,9 @@ const calculateKPIs = () => {
   const totalNext = reportData.value.reduce((sum, emp) => sum + emp.nextAnnualSalary, 0);
   const avgIncrease = reportData.value.reduce((sum, emp) => sum + emp.increaseRate, 0) / reportData.value.length;
 
-  const retiredCount = reportData.value.filter(
-    (emp) => emp.employmentStatus === EmployeeServiceType.EmploymentStatus.RETIRED,
-  ).length;
+  const retiredCount = retiredEmployees.value.length;
 
-  const workingCount = reportData.value.filter(
-    (emp) => emp.employmentStatus !== EmployeeServiceType.EmploymentStatus.RETIRED,
-  ).length;
+  const workingCount = reportData.value.length;
 
   kpiData.value = {
     currentEmployees: workingCount,
@@ -161,9 +165,6 @@ const updateChartData = () => {
   performanceChartData.value.datasets[0].data = reportData.value.map((emp) => emp.totalScore);
 };
 
-const topPerformers = ref<ReportType.Report[]>([]);
-const bottomPerformers = ref<ReportType.Report[]>([]);
-
 const calculateRankings = () => {
   if (reportData.value.length === 0) return;
 
@@ -173,7 +174,8 @@ const calculateRankings = () => {
   const bottomCount = Math.ceil(sorted.length * 0.1);
 
   topPerformers.value = sorted.slice(0, topCount);
-  bottomPerformers.value = sorted.slice(-bottomCount);
+  const topIds = topPerformers.value.map((emp) => emp.employeeEvaluationIdx);
+  bottomPerformers.value = sorted.filter((emp) => !topIds.includes(emp.employeeEvaluationIdx)).slice(-bottomCount);
 };
 
 const refreshData = async () => {

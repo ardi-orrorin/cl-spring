@@ -65,10 +65,6 @@ const updateUrlQuery = () => {
   router.push({ query });
 };
 
-const searchEmployeeList = () => {
-  updateUrlQuery();
-};
-
 const openDetailModal = (employeeId: number) => {
   selectedEmployeeId.value = employeeId;
   showDetailModal.value = true;
@@ -77,6 +73,60 @@ const openDetailModal = (employeeId: number) => {
 const closeDetailModal = () => {
   showDetailModal.value = false;
   selectedEmployeeId.value = null;
+};
+
+const handleExcelUpload = (event: Event) => {
+  const file = (event.target as HTMLInputElement).files?.[0];
+  if (!file) return;
+
+  parseExcelFile(file);
+
+  (event.target as HTMLInputElement).value = '';
+};
+
+// todo: 일단 보류
+const parseExcelFile = async (file: File) => {
+  try {
+    const ExcelJS = await import('exceljs');
+    const workbook = new ExcelJS.Workbook();
+
+    const arrayBuffer = await file.arrayBuffer();
+    await workbook.xlsx.load(arrayBuffer);
+
+    const worksheet = workbook.getWorksheet(1);
+    if (!worksheet) return;
+
+    const employees: EmployeeServiceType.Create[] = [];
+
+    worksheet.eachRow((row, rowNumber) => {
+      if (rowNumber === 1) return; // Skip header
+
+      const values = row.values as any[];
+
+      const employee: EmployeeServiceType.Create = {
+        name: values[1] || '',
+        employeeNumber: values[2] || '',
+        hireYear: values[3] || '',
+        jobTitle: values[4] || '',
+        currentAnnualSalary: Number(values[5]) || 0,
+        employmentStatus: values[6] || '',
+        deptName: values[7] || '',
+        workLocation: values[8] || '',
+        email: values[9] || '',
+        phoneNumber: values[10] || '',
+        remark: values[11] || '',
+      };
+
+      employees.push(employee);
+    });
+
+    console.log('Parsed employees:', employees);
+
+    alert(`${employees.length}명의 사원 데이터가 파싱되었습니다.`);
+  } catch (err) {
+    console.error('Excel parsing error:', err);
+    alert('Excel 파일 파싱에 실패했습니다.');
+  }
 };
 </script>
 
@@ -101,7 +151,7 @@ const closeDetailModal = () => {
           </select>
         </div>
         <div class="col">
-          <button class="btn btn-primary w-100" @click="searchEmployeeList">검색</button>
+          <button class="btn btn-primary w-100" @click="updateUrlQuery">검색</button>
         </div>
       </div>
     </div>
@@ -154,7 +204,10 @@ const closeDetailModal = () => {
 
     <div class="mt-5 d-flex gap-3">
       <button class="btn btn-success" @click="router.push('/employee/create')">신규 사원 등록</button>
-      <button class="btn btn-success">사원 등록 (Excel)</button>
+      <label class="btn btn-success">
+        사원 등록 (Excel)
+        <input type="file" accept=".xlsx,.xls" @change="handleExcelUpload" hidden />
+      </label>
     </div>
 
     <DetailModal :show="showDetailModal" :employee-id="selectedEmployeeId" @close="closeDetailModal" />

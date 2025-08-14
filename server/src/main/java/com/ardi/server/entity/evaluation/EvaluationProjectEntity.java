@@ -28,6 +28,15 @@ public class EvaluationProjectEntity {
     @JoinColumn(name = "employees_evaluation_idx")
     private EmployeesEvaluationEntity employeesEvaluation;
 
+
+    @PrePersist
+    public void prePersist() {
+        createdAt = Instant.now();
+        if(name == null) name = "";
+        if(participationPeriod == null) participationPeriod = "";
+        if(remark == null) remark = "";
+    }
+
     public ResponseEvaluationProject.Project toProject() {
         return new ResponseEvaluationProject.Project(
             idx,

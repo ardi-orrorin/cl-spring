@@ -16,7 +16,7 @@ public class RequestEvaluationProject {
             EvaluationProjectEntity entity = new EvaluationProjectEntity();
             entity.setName(name);
             entity.setParticipationPeriod(participationPeriod);
-            entity.setRemark(remark == null ? "" : remark);
+            entity.setRemark(remark);
             entity.setCreatedAt(Instant.now());
             return entity;
         }
